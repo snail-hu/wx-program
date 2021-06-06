@@ -36,20 +36,20 @@ const handleError = (err) => {
 }
 
 // task start
-gulp.task('json', () => {
+gulp.task('json', gulp.series(() => {
   return gulp.src(`${src}/**/*.json`).pipe(isProd ? jsonminify() : through.obj()).pipe(gulp.dest(dist))
-})
+}))
 
-gulp.task('wxml', () => {
+gulp.task('wxml', gulp.series(() => {
   return gulp
     .src(`${src}/**/*.wxml`)
     .pipe(gulp.dest(dist))
-})
-gulp.task('wxs', () => {
+}))
+gulp.task('wxs', gulp.series(() => {
   return gulp.src(`${src}/**/*.wxs`).pipe(gulp.dest(dist))
-})
+}))
 
-gulp.task('wxss', () => {
+gulp.task('wxss', gulp.series(() => {
   const combined = combiner.obj([
     gulp.src(`${src}/**/*.{wxss,scss}`),
     sass().on('error', sass.logError),
@@ -65,13 +65,13 @@ gulp.task('wxss', () => {
   ])
 
   combined.on('error', handleError)
-})
+}))
 
-gulp.task('images', () => {
+gulp.task('images', gulp.series(() => {
   return gulp.src(`${src}/images/**`).pipe(gulp.dest(`${dist}/images`))
-})
+}))
 
-gulp.task('js', () => {
+gulp.task('js', gulp.series(() => {
   const f = filter((file) => !/(mock)/.test(file.path))
   gulp
     .src(`${src}/**/*.js`)
@@ -100,31 +100,31 @@ gulp.task('js', () => {
     )
     .pipe(isProd ? through.obj() : sourcemaps.write('./'))
     .pipe(gulp.dest(dist))
-})
+}))
 
-gulp.task('watch', () => {
+gulp.task('watch', gulp.series(() => {
   ;['wxml', 'wxss', 'js', 'json', 'wxs'].forEach((v) => {
     gulp.watch(`${src}/**/*.${v}`, [v])
   })
   gulp.watch(`${src}/images/**`, ['images'])
   gulp.watch(`${src}/**/*.scss`, ['wxss'])
-})
+}))
 
-gulp.task('clean', () => {
+gulp.task('clean', gulp.series(() => {
   return del(['./dist/**'])
-})
+}))
 
-gulp.task('dev', ['clean'], () => {
+gulp.task('dev', gulp.series(['clean'], () => {
   runSequence('json', 'images', 'wxml', 'wxss', 'js', 'wxs', 'cloud', 'watch')
-})
+}))
 
-gulp.task('build', ['clean'], () => {
+gulp.task('build', gulp.series(['clean'], () => {
   runSequence('json', 'images', 'wxml', 'wxss', 'js', 'wxs', 'cloud')
-})
+}))
 
 // cloud-functions 处理方法
 const cloudPath = './server/cloud-functions'
-gulp.task('cloud', () => {
+gulp.task('cloud', gulp.series(() => {
   return gulp
     .src(`${cloudPath}/**`)
     .pipe(
@@ -137,12 +137,12 @@ gulp.task('cloud', () => {
           })
     )
     .pipe(gulp.dest(`${dist}/cloud-functions`))
-})
+}))
 
-gulp.task('watch:cloud', () => {
+gulp.task('watch:cloud', gulp.series(() => {
   gulp.watch(`${cloudPath}/**`, ['cloud'])
-})
+}))
 
-gulp.task('cloud:dev', () => {
+gulp.task('cloud:dev', gulp.series(() => {
   runSequence('cloud', 'watch:cloud')
-})
+}))

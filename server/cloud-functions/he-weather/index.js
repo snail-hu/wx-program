@@ -12,7 +12,7 @@ exports.main = async (event) => {
   let location = `${lat},${lon}`
   let params = {
     location,
-    key: 'XXX' //和风天气中应用的密钥
+    key: '6f38e3cf13384ab8a27a8e68a4232fe1' //和风天气中应用的密钥
   }
   let query = []
   for (let i in params) {
